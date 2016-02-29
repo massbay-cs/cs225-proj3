@@ -5713,7 +5713,7 @@ Uses CSS#</dia:string>
         <dia:point val="-2.58752,27.5153"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="-3.34497,27.4649;67.0421,89.6501"/>
+        <dia:rectangle val="-3.34496,27.4649;67.0421,89.6501"/>
       </dia:attribute>
       <dia:attribute name="poly_points">
         <dia:point val="-2.58752,27.5153"/>
@@ -5760,19 +5760,19 @@ Uses CSS#</dia:string>
     </dia:object>
     <dia:object type="Standard - PolyLine" version="0" id="O40">
       <dia:attribute name="obj_pos">
-        <dia:point val="49.0875,28.1818"/>
+        <dia:point val="49.1875,17.5375"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="48.8861,28.1291;101.889,89.4069"/>
+        <dia:rectangle val="49.1355,17.3875;101.887,89.4068"/>
       </dia:attribute>
       <dia:attribute name="poly_points">
-        <dia:point val="49.0875,28.1818"/>
+        <dia:point val="49.1875,17.5375"/>
         <dia:point val="51.1875,65.6818"/>
         <dia:point val="70.0875,66.3818"/>
         <dia:point val="71.2125,89.3318"/>
         <dia:point val="101.837,89.3568"/>
-        <dia:point val="99.9375,29.8068"/>
-        <dia:point val="48.9375,28.3068"/>
+        <dia:point val="101.35,17.4375"/>
+        <dia:point val="49.2375,17.4375"/>
       </dia:attribute>
     </dia:object>
     <dia:object type="Standard - Text" version="1" id="O41">
@@ -5813,22 +5813,22 @@ Uses CSS#</dia:string>
         <dia:point val="44.0923,-0.415736"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="43.9423,-0.765736;74.6423,27.9349"/>
+        <dia:rectangle val="43.7875,-0.765736;74.9384,16.4879"/>
       </dia:attribute>
       <dia:attribute name="poly_points">
         <dia:point val="44.0923,-0.415736"/>
-        <dia:point val="44.1923,27.4843"/>
-        <dia:point val="74.5923,27.8843"/>
+        <dia:point val="43.8375,16.1875"/>
+        <dia:point val="74.8875,16.4375"/>
         <dia:point val="74.5923,-0.715736"/>
         <dia:point val="43.9923,-0.715736"/>
       </dia:attribute>
     </dia:object>
     <dia:object type="Standard - Text" version="1" id="O43">
       <dia:attribute name="obj_pos">
-        <dia:point val="45.7923,25.6843"/>
+        <dia:point val="45.7923,15.0843"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="45.7923,24.4268;48.6173,26.0043"/>
+        <dia:rectangle val="45.7923,13.8268;48.6173,15.4043"/>
       </dia:attribute>
       <dia:attribute name="text">
         <dia:composite type="text">
@@ -5842,7 +5842,7 @@ Uses CSS#</dia:string>
             <dia:real val="1.6933332681655884"/>
           </dia:attribute>
           <dia:attribute name="pos">
-            <dia:point val="45.7923,25.6843"/>
+            <dia:point val="45.7923,15.0843"/>
           </dia:attribute>
           <dia:attribute name="color">
             <dia:color val="#000000"/>
