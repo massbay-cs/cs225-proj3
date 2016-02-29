@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>paul-massbay-cs225</groupId>
-	<artifactId>FIXME</artifactId>
+    <groupId>massbay-cs225</groupId>
+	<artifactId>proj3</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <url>https://${paul.repoSite}/${paul.repoPath}</url>
@@ -14,12 +14,12 @@
         <paul.id>${project.artifactId}</paul.id>
         <paul.mainClass>FIXME</paul.mainClass>
 
-        <paul.studentId>paul</paul.studentId>
-        <paul.longStudentId>PaulBuonopane</paul.longStudentId>
+        <paul.studentId>paul-keven-thomas</paul.studentId>
+        <paul.longStudentId>PaulKevinThomas</paul.longStudentId>
         <paul.classId>cs225</paul.classId>
         <paul.schoolId>massbay</paul.schoolId>
-        <paul.repoSite>bitbucket.org</paul.repoSite>
-        <paul.repoPath>${paul.studentId}-${paul.schoolId}/${paul.classId}-${paul.id}</paul.repoPath>
+        <paul.repoSite>github.com</paul.repoSite>
+		<paul.repoPath>${paul.schoolId}-cs/${paul.classId}-${paul.artifactId}</paul.repoPath>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
