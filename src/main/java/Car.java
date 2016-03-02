@@ -9,6 +9,7 @@ public class Car{
     private RaceLeg currentLeg;
     private List<ReachLocationEventHandler> reachLocationEventHandlers;
     public double cumulativeTime;
+
     /**
      *
      *
@@ -17,6 +18,8 @@ public class Car{
         this.name = n;
         this.build = b;
     }
+
+
     /**
      *
      *
@@ -24,6 +27,23 @@ public class Car{
     private void onReachLocationListner(Location previous, Location next){
 
     }
+
+    /**
+     *
+     *
+     */
+    public int hashCode(){
+
+    }
+
+    /**
+     *
+     *
+     */
+    public boolean equals(object other){
+
+    }
+
     /**
      *
      *
@@ -32,7 +52,7 @@ public class Car{
     this.timeToNext = this.timeToNext - time;
         if(timeToNext < 0){
             timeToNext = 0;
-        onReachLocationListner();
+            ();
         }
 
     }
