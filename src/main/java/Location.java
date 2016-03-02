@@ -4,36 +4,42 @@
  * and open the template in the editor.
  */
 
+import java.util.Objects;
+
 /**
  *
  * @author whis
  */
 public class Location {
-    private String nameOfLocation;
+    private final String name;
     
-    public Location(String location){
-        location = nameOfLocation;
+    public Location(String name){
+        this.name = name;
     }
     
-    public String getNameOfLocation(){
-        return nameOfLocation;
+    public String getName(){
+        return name;
     }
     
     @Override
     public String toString(){
-        return "";
+        return name;
     }
-    
-    public int hasCode(){
-    
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(name);
     }
     
     @Override
     public boolean equals(Object obj){
-        if(obj == this){
+        if (obj == this){
             return true;
-        } if(obj == null || obj.getClass() != this.getClass()){
+        } else if(obj == null || obj.getClass() != this.getClass()){
             return false;
         }
+
+        Location other = (Location) obj;
+        return Objects.equals(other.getName(), getName());
     }
 }
