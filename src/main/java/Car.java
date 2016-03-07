@@ -1,5 +1,7 @@
+import java.awt.*
+import javafx.*
 /**
-*
+* A car with a name and a premade build praramiters
 *
 */
 public class Car{
@@ -18,6 +20,13 @@ public class Car{
         this.name = n;
         this.build = b;
     }
+
+
+    interface LocationListner {
+
+
+    }
+
 
 
     /**
@@ -49,10 +58,11 @@ public class Car{
      *
      */
     public void drive(double time){
-    this.timeToNext = this.timeToNext - time;
-        if(timeToNext < 0){
+        this.timeToNext = this.timeToNext - time;
+        this.cumulativeTime += time;
+        if(timeToNext <= 0){
             timeToNext = 0;
-            ();
+            onReachLocationListner();
         }
 
     }
@@ -61,14 +71,14 @@ public class Car{
      *
      */
     public void addReachLocationListner(reachLocationEventHandlers listner){
-
+        reachLocationEventHandlers.add(listner);
     }
     /**
      *
      *
      */
     public void removeReachLocationListner(reachLocationEventHandlers listner){
-
+        reachLocationEventHandlers.remove(listner);
     }
     /**
      *
@@ -103,22 +113,16 @@ public class Car{
      *
      */
     public Location getStartLocation(){
-
+  //  return ;
     }
     /**
      *
      *
      */
     public Location getEndLocation(){
-
+  //  return ;
     }
-    /**
-     *
-     *
-     */
-    public List<Location> getPath(){
 
-    }
     /**
      *
      *
