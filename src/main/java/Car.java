@@ -1,5 +1,5 @@
-import java.awt.*
-import javafx.*
+import java.util.ArrayList;
+import java.util.List;
 /**
 * A car with a name and a premade build praramiters
 *
@@ -9,7 +9,7 @@ public class Car{
     private CarBuild build;
     private double timeToNext;
     private RaceLeg currentLeg;
-    private List<ReachLocationEventHandler> reachLocationEventHandlers;
+    private final List<ReachLocationEventHandler> reachLocationEventHandlers = new ArrayList<>();
     public double cumulativeTime;
 
     /**
@@ -22,19 +22,15 @@ public class Car{
     }
 
 
-    interface LocationListner {
-
-
-    }
-
-
 
     /**
      *
      *
      */
-    private void onReachLocationListner(Location previous, Location next){
-
+    private void onReachLocation(RaceLeg completedLeg){
+        for (ReachLocationEventHandler listener : reachLocationEventHandlers) {
+            listener.reachLocation(this, completedLeg);
+        }
     }
 
     /**
@@ -49,7 +45,7 @@ public class Car{
      *
      *
      */
-    public boolean equals(object other){
+    public boolean equals(Object other){
 
     }
 
@@ -62,7 +58,7 @@ public class Car{
         this.cumulativeTime += time;
         if(timeToNext <= 0){
             timeToNext = 0;
-            onReachLocationListner();
+            onReachLocation(currentLeg);
         }
 
     }
@@ -70,15 +66,15 @@ public class Car{
      *
      *
      */
-    public void addReachLocationListner(reachLocationEventHandlers listner){
-        reachLocationEventHandlers.add(listner);
+    public void addReachLocationListener(ReachLocationEventHandler listener){
+        reachLocationEventHandlers.add(listener);
     }
     /**
      *
      *
      */
-    public void removeReachLocationListner(reachLocationEventHandlers listner){
-        reachLocationEventHandlers.remove(listner);
+    public void removeReachLocationListener(ReachLocationEventHandler listener){
+        reachLocationEventHandlers.remove(listener);
     }
     /**
      *
