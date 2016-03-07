@@ -1,4 +1,3 @@
-interface Gastank{
-
-    public double getGallons();
+public interface GasTank {
+    double getGallons();
 }

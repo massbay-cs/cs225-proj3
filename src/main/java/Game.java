@@ -1,14 +1,13 @@
 import javafx.application.Application;
-import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.NumberBinding;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
-import static util.I18n.*;
+
+import static util.I18n.s;
 
 public class Game extends Application {
     private static final int DEFAULT_WIDTH = 1100;
@@ -43,7 +42,7 @@ public class Game extends Application {
         root.setId("root");
 
         Circle circle = new Circle(100);
-        circle.radiusProperty().bind(DoubleBinding.min(canvas.widthProperty(), canvas.heightProperty()));
+        circle.radiusProperty().bind(Bindings.min(canvas.widthProperty(), canvas.heightProperty()));
         circle.centerXProperty().bind(canvas.widthProperty().divide(2));
         circle.centerYProperty().bind(canvas.heightProperty().divide(2));
 

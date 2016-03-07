@@ -1,8 +1,6 @@
-interface Engine{
-
-    public double getHorsepower();
-    public double getCylinders();
-    public Gastype getGasType();
-    public double getAverageMPG();
-
+public interface Engine {
+    double getHorsepower();
+    double getCylinders();
+    GasType getGasType();
+    double getAverageMPG();
 }

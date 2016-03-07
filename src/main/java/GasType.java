@@ -1,5 +1,14 @@
 public enum GasType {
-    GASOLINE, DIESEL
+    GASOLINE(1.0),  // TODO
+    DIESEL(1.0);    // TODO
 
-    public double getDensity();
+    private final double density;
+
+    GasType(double density) {
+        this.density = density;
+    }
+
+    public double getDensity() {
+        return density;
+    }
 }

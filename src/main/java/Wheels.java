@@ -1,5 +1,4 @@
-interface Wheels{
-
-    public double getRadius();
-    public double getWidth();
+public interface Wheels {
+    double getRadius();
+    double getWidth();
 }

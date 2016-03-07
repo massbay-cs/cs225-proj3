@@ -1,7 +1,6 @@
-interface Tires{
-
-    public double getCoefficientOfFriction();
-    public double getWidthInset();
-    public double getAddedRadius();
-    public double getInflationPrecentage();
+public interface Tires {
+    double getCoefficientOfFriction();
+    double getWidthInset();
+    double getAddedRadius();
+    double getInflationPrecentage();
 }
