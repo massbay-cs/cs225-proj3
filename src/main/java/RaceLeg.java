@@ -8,7 +8,7 @@
  *
  * @author whis
  */
-public class RaceLeg {
+public final class RaceLeg {
     private double distance;
     private double elevationDelta;
     private double averageTurnRadius;
@@ -17,17 +17,16 @@ public class RaceLeg {
     private Location endLocation;
     
     //Constructor for the class
-    public RaceLeg(double d, double elevation, double averageTurn, Conditions c,
-             Location start, Location end){
-        distance = d;
-        elevationDelta = elevation;
-        averageTurnRadius = averageTurn;
-        conditions = c;
-        startLocation = start;
-        endLocation = end;
+    public RaceLeg(double distance, double elevationDelta, double averageTurnRadius, Conditions conditions, Location startLocation, Location endLocation){
+        this.distance = distance;
+        this.elevationDelta = elevationDelta;
+        this.averageTurnRadius = averageTurnRadius;
+        this.conditions = conditions;
+        this.startLocation = startLocation;
+        this.endLocation = endLocation;
     }
     
-    //Accesors for the instance variables in the class
+    //Accessors for the instance variables in the class
     public double getDistance(){
         return distance;
     }

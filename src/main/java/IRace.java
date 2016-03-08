@@ -6,7 +6,7 @@ public interface IRace {
 
     List<Car> getCarsByPosition();
 
-    RaceTrack getTrack();
+    IRaceTrack getTrack();
 
     boolean isComplete();
 
