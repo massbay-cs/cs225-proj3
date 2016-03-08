@@ -37,22 +37,6 @@ public class Car{
      *
      *
      */
-    public int hashCode(){
-
-    }
-
-    /**
-     *
-     *
-     */
-    public boolean equals(Object other){
-
-    }
-
-    /**
-     *
-     *
-     */
     public void drive(double time){
         this.timeToNext = this.timeToNext - time;
         this.cumulativeTime += time;
@@ -109,14 +93,14 @@ public class Car{
      *
      */
     public Location getStartLocation(){
-  //  return ;
+        return getCurrentLeg().getStartLocation();
     }
     /**
      *
      *
      */
     public Location getEndLocation(){
-  //  return ;
+        return getCurrentLeg().getEndLocation();
     }
 
     /**

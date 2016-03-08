@@ -1,34 +1,37 @@
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.When;
 import javafx.geometry.VPos;
-import javafx.scene.Node;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static util.I18n.s;
 
 public class Game extends Application {
     private static final FontSmoothingType SMOOTHING = FontSmoothingType.LCD; // GRAY has lousy kerning
-    private static final int DEFAULT_WIDTH = 1100;
+    private static final int DEFAULT_WIDTH = 600;
     private static final int DEFAULT_HEIGHT = 600;
     private static final Paint TRACK_PAINT = Color.BLACK;
     private static final double TRACK_WIDTH = 3.0;
-    private static final double TRACK_PADDING = 10.0;
+    private static final double TRACK_PADDING = 20.0;
     private static final Paint LOCATION_PAINT = Color.BLACK;
     private static final double LOCATION_RADIUS = 5.0;
     private static final double LOCATION_WIDTH = 2.0;
@@ -40,6 +43,7 @@ public class Game extends Application {
     private IRace race;
     private Stage stage;
     private final List<GuiLocation> guiLocations = new ArrayList<>();
+    private final List<GuiCar> guiCars = new ArrayList<>();
 
     // Race Scene
     private Pane canvas;
@@ -86,9 +90,89 @@ public class Game extends Application {
         track.setStrokeWidth(TRACK_WIDTH);
         track.setFill(Color.TRANSPARENT);
 
+        createLocations(5);
         updateLocations();
+        createCars(5);
+        updateCars();
+
+        int min = 2;
+        int max = 10;
+
+        Slider locationsSlider = new Slider(2, 10, getLocations().size());
+        Slider carsSlider = new Slider(2, 10, getCars().size());
+        VBox sliders = new VBox(
+                new HBox(new Label("Locations:"), locationsSlider),
+                new HBox(new Label("Cars:"), carsSlider)
+        );
+        root.setBottom(sliders);
+
+        locationsSlider.valueProperty().addListener((obs, o, n) -> {
+            int x = (int) Math.round(o.doubleValue());
+            int y = (int) Math.round(n.doubleValue());
+            if (x != y && y >= min && y <= max) {
+                createLocations(y);
+                updateLocations();
+                updateCars();
+            }
+        });
+        carsSlider.valueProperty().addListener((obs, o, n) -> {
+            int x = (int) Math.round(o.doubleValue());
+            int y = (int) Math.round(n.doubleValue());
+            if (x != y && y >= min && y <= max) {
+                createCars(y);
+                updateCars();
+            }
+        });
 
         return new Scene(root, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    }
+
+    private void updateCars() {
+        if (canvas == null || track == null) {
+            return;
+        }
+
+        for (GuiCar car : guiCars) {
+            canvas.getChildren().removeAll(car.getNodes());
+        }
+        guiCars.clear();
+
+        // TODO: Use actual cars; this is all just debug code
+        int count = getCars().size();
+        for (int i = 0; i < count; i++) {
+            double position = 0;
+            GuiCar car = new GuiCar(getCars().get(i), i, count, position, track);
+            guiCars.add(car);
+
+            position = guiLocations.get((i + 1) % guiLocations.size()).getPosition();
+            position += (i + 1) / guiLocations.size();
+            car.setPosition(Math.min(1, position));
+
+            car.getIcon().setCursor(Cursor.HAND);
+            car.getIcon().setOnMouseClicked(e -> {
+                if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 1) {
+                    Double pos = car.getPosition();
+
+                    if (pos >= 1) {
+                        car.setPosition(0);
+                    } else {
+                        double target = 1;
+                        for (GuiLocation location : guiLocations) {
+                            if (location.getPosition() > pos) {
+                                target = location.getPosition();
+                                break;
+                            }
+                        }
+
+                        car.driveTo(target, count * 1_000 * (target - pos));
+                    }
+                }
+            });
+        }
+
+        for (GuiCar car : guiCars) {
+            canvas.getChildren().addAll(car.getNodes());
+        }
     }
 
     private void updateLocations() {
@@ -109,7 +193,7 @@ public class Game extends Application {
         {
             Iterator<Location> locationIterator = getLocations().iterator();
             for (int i = 0; i < count && locationIterator.hasNext(); i++) {
-                guiLocations.add(new GuiLocation(locationIterator.next(), new Text(), new Circle()));
+                guiLocations.add(new GuiLocation(locationIterator.next()));
             }
         }
 
@@ -118,15 +202,21 @@ public class Game extends Application {
             Iterator<RaceLeg> legIterator = legs.iterator();
             double cumulDistance = 0.0;
             int i = 0;
+            RaceLeg previousLeg = legs.get(legs.size() - 1);
             for (GuiLocation loc : guiLocations) {
+                RaceLeg nextLeg = legIterator.next();
+
                 if (i > 0) {
-                    cumulDistance += legIterator.next().getDistance();
+                    cumulDistance += previousLeg.getDistance();
                 }
 
-                double theta = Math.PI * 2.0 * cumulDistance / totalDistance - Math.PI / 2;
-                double x = Math.cos(theta);
-                double y = Math.sin(theta);
-                System.out.printf("theta:%f  cos:%f  sin:%f  x:%f  y:%f%n", theta, x, y, 100 * x, 100 * y);
+                double completion = cumulDistance / totalDistance;
+                double nextMidpoint = previousLeg.getDistance() / totalDistance / 2;
+                double previousMidpoint = nextLeg.getDistance() / totalDistance / 2;
+
+                loc.setPosition(completion);
+                double x = loc.getX();
+                double y = loc.getY();
 
                 Circle point = loc.getPoint();
                 point.setRadius(LOCATION_RADIUS);
@@ -136,23 +226,38 @@ public class Game extends Application {
                 point.centerXProperty().bind(track.radiusProperty().multiply(x).add(track.centerXProperty()));
                 point.centerYProperty().bind(track.radiusProperty().multiply(y).add(track.centerYProperty()));
 
-                Text previous = guiLocations.get(i - 1 >= 0 ? i - 1 : count - 1).getLabel();
                 Text label = loc.getLabel();
                 label.setText(loc.getLocation().getName());
                 label.setFont(font);
                 label.setFontSmoothingType(SMOOTHING);
                 label.setFill(LOCATION_LABEL_FILL);
-                label.setTextOrigin(VPos.CENTER);
+                label.setTextOrigin(VPos.TOP);
+                label.setTextAlignment(TextAlignment.CENTER);
                 label.xProperty().bind(point.centerXProperty());
                 label.yProperty().bind(point.centerYProperty());
+                label.wrappingWidthProperty().bind(track.radiusProperty().multiply(2 * Math.PI * Math.min(previousMidpoint, nextMidpoint) * 2));
 
-                DoubleBinding margin = BoundsBindings.height(label.layoutBoundsProperty()).divide(2.0).add(LOCATION_LABEL_MARGIN);
-                When intersecting = Bindings.when(BoundsBindings.intersect(label.layoutBoundsProperty(), previous.layoutBoundsProperty()));
-                DoubleBinding offset = margin.multiply(intersecting.then(-1).otherwise(1)).subtract(intersecting.then(BoundsBindings.height(label.layoutBoundsProperty())).otherwise(0));
-                label.translateXProperty().bind(BoundsBindings.width(label.layoutBoundsProperty()).divide(-2.0).add(Bindings.multiply(x, offset)));
-                label.translateYProperty().bind(Bindings.multiply(y, offset));
-                label.setRotate(theta * 180 / Math.PI + 90);
 
+                DoubleBinding offset = BoundsBindings.height(label.layoutBoundsProperty()).divide(2.0).add(LOCATION_LABEL_MARGIN);
+                label.translateXProperty().bind(BoundsBindings.width(label.layoutBoundsProperty()).divide(-2).add(Bindings.multiply(x, offset)));
+                label.translateYProperty().bind(BoundsBindings.height(label.layoutBoundsProperty()).divide(-2).add(Bindings.multiply(y, offset)));
+                label.setRotate(loc.getAngle() + 90);
+
+                // Debug
+                Rectangle rect = new Rectangle();
+                rect.setStroke(Color.BLUE);
+                rect.setStrokeWidth(2);
+                rect.setFill(Color.TRANSPARENT);
+                rect.xProperty().bind(label.xProperty());
+                rect.yProperty().bind(label.yProperty());
+                rect.widthProperty().bind(BoundsBindings.width(label.layoutBoundsProperty()));
+                rect.heightProperty().bind(BoundsBindings.height(label.layoutBoundsProperty()));
+                rect.translateXProperty().bind(label.translateXProperty());
+                rect.translateYProperty().bind(label.translateYProperty());
+                rect.rotateProperty().bind(label.rotateProperty());
+                //canvas.getChildren().add(rect);
+
+                previousLeg = nextLeg;
                 i++;
             }
         }
@@ -166,31 +271,42 @@ public class Game extends Application {
     // TEST CODE
     //
 
-    private List<Location> locations = Arrays.asList(
-            new Location("Apple Headquarters"),
-            new Location("Baseball Field"),
-            new Location("Candy Store"),
-            new Location("Duck Hunting"),
-            new Location("East of Eden"),
-            new Location("Frisbee Store"),
-            new Location("Googleplex"),
-            new Location("Hidden Volcano"),
-            new Location("Istanbul"),
-            new Location("Jamaica")
-    );
+    private List<Location> locations;
 
-    private List<RaceLeg> raceLegs = Arrays.asList(
-            new RaceLeg(1, 0, 0, Conditions.SUNNY, locations.get(0), locations.get(1)),
-            new RaceLeg(1, 0, 0, Conditions.SUNNY, locations.get(1), locations.get(3)),
-            new RaceLeg(1, 0, 0, Conditions.SUNNY, locations.get(2), locations.get(3)),
-            new RaceLeg(2, 0, 0, Conditions.SUNNY, locations.get(3), locations.get(4)),
-            new RaceLeg(2, 0, 0, Conditions.SUNNY, locations.get(4), locations.get(5)),
-            new RaceLeg(2, 0, 0, Conditions.SUNNY, locations.get(5), locations.get(6)),
-            new RaceLeg(2, 0, 0, Conditions.SUNNY, locations.get(6), locations.get(7)),
-            new RaceLeg(3, 0, 0, Conditions.SUNNY, locations.get(7), locations.get(8)),
-            new RaceLeg(3, 0, 0, Conditions.SUNNY, locations.get(8), locations.get(9)),
-            new RaceLeg(3, 0, 0, Conditions.SUNNY, locations.get(9), locations.get(0))
-    );
+    private void createLocations(int count) {
+        Location[] all = {
+                new Location("Apple Headquarters"),
+                new Location("Baseball Field"),
+                new Location("Candy Store"),
+                new Location("Duck Hunting"),
+                new Location("East of Eden"),
+                new Location("Frisbee Store"),
+                new Location("Googleplex"),
+                new Location("Hidden Volcano"),
+                new Location("Istanbul"),
+                new Location("Jamaica"),
+        };
+
+        locations = Arrays.asList(Arrays.copyOf(all, count));
+
+        Random random = new Random();
+        RaceLeg[] legs = new RaceLeg[count];
+
+        for (int i = 0; i < count; i++) {
+            int next = i + 1 < count ? i + 1 : 0;
+            double distance = random.nextDouble() + 1;
+            double elevation = random.nextInt(10_000) - 5_000;
+            double averageTurnRadius = random.nextDouble();
+            Conditions conditions = random.nextDouble() > 0.2 ? Conditions.values()[random.nextInt(Conditions.values().length)] : Conditions.SUNNY;
+            Location start = locations.get(i);
+            Location end = locations.get(next);
+            legs[i] = new RaceLeg(distance, elevation, averageTurnRadius, conditions, start, end);
+        }
+
+        raceLegs = Arrays.asList(legs);
+    }
+
+    private List<RaceLeg> raceLegs;
 
     private List<RaceLeg> getRaceLegs() {
         return raceLegs;
@@ -200,36 +316,13 @@ public class Game extends Application {
         return locations;
     }
 
+    private List<Car> cars;
 
-    private static class GuiLocation {
-        private final Location location;
-        private final Text label;
-        private final Circle point;
+    private void createCars(int n) {
+        cars = Arrays.asList(new Car[n]);
+    }
 
-        private GuiLocation(Location location) {
-            this(location, new Text(), new Circle());
-        }
-
-        private GuiLocation(Location location, Text label, Circle point) {
-            this.location = location;
-            this.label = label;
-            this.point = point;
-        }
-
-        public List<Node> getNodes() {
-            return Arrays.asList(label, point);
-        }
-
-        public Location getLocation() {
-            return location;
-        }
-
-        public Text getLabel() {
-            return label;
-        }
-
-        public Circle getPoint() {
-            return point;
-        }
+    private List<Car> getCars() {
+        return cars;
     }
 }

@@ -9,5 +9,5 @@
  * @author whis
  */
 public enum Conditions {
-    SUNNY, CLOUDY, RAINY, SNOWY, DRY, FOGGY 
+    SUNNY, CLOUDY, RAINY, SNOWY, FOGGY
 }

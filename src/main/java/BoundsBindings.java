@@ -7,17 +7,34 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 
 public final class BoundsBindings {
-    public static BooleanBinding intersect(ObservableValue<Bounds> bounds, ObservableValue<Bounds> other) {
-        return new BooleanBoundsBinding(bounds) {
+    public static BooleanBinding intersect(ObservableValue<Bounds> bounds, ObservableValue<Bounds> other, String debugLeft, String debugRight) {
+        return new BooleanBoundsBinding(bounds, other) {
             @Override
             protected boolean computeValue() {
-                return bounds.getValue().intersects(other.getValue());
+                Bounds a = bounds.getValue();
+                Bounds b = other.getValue();
+                boolean value = a.intersects(b);
+                /*if (value) {
+                    System.out.printf("Intersects: %s (%.0f, %.0f):(%.0f, %.0f) with %s (%.0f, %.0f):(%.0f, %.0f)%n",
+                            debugLeft,
+                            a.getMinX(),
+                            a.getMinY(),
+                            a.getMaxX(),
+                            a.getMaxY(),
+                            debugRight,
+                            b.getMinX(),
+                            b.getMinY(),
+                            b.getMaxX(),
+                            b.getMaxY()
+                    );
+                }*/
+                return value;
             }
         };
     }
 
     public static BooleanBinding contains(ObservableValue<Bounds> bounds, ObservableValue<Bounds> other) {
-        return new BooleanBoundsBinding(bounds) {
+        return new BooleanBoundsBinding(bounds, other) {
             @Override
             protected boolean computeValue() {
                 return bounds.getValue().contains(other.getValue());
