@@ -4,11 +4,11 @@ public class Jalopy implements CarBuild{
     private GasTank gasTank;
     private Tires tires;
 
-    public class Jalopy(){
-        this.wheels = BaseWheels;
-        this.engine = BaseEngine;
-        this.gasTank = BaseTank;
-        this.tires = BaseTires;
+    public Jalopy(){
+        this.wheels = new BaseWheels();
+        this.engine = new BaseEngine();
+        this.gasTank = new BaseTank();
+        this.tires = new BaseTires();
     }
 
     public Engine getEngine() {
