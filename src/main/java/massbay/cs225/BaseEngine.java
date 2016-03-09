@@ -2,31 +2,31 @@ package massbay.cs225;
 
 public class BaseEngine implements Engine{
 
-    private double Horsepower;
-    private int Cylinders;
-    private GasType GasType;
-    private double AverageMPG;
+    private double horsepower;
+    private int cylinders;
+    private GasType gasType;
+    private double averageMPG;
 
     public BaseEngine(){
-        this.Horsepower = 3.0;
-        this.Cylinders = 2;
-        this.GasType = GASOLINE;
-        this.AverageMPG = (Horsepower * GasType.getDensity() * Cylinders);
+        this.horsepower = 3.0;
+        this.cylinders = 2;
+        this.gasType = GasType.GASOLINE;
+        this.averageMPG = (horsepower * gasType.getDensity() * cylinders);
     }
 
     public int getCylinders() {
-        return Cylinders;
+        return cylinders;
     }
 
     public double getHorsepower() {
-        return Horsepower;
+        return horsepower;
     }
 
     public GasType getGasType() {
-        return GasType;
+        return gasType;
     }
 
     public double getAverageMPG() {
-        return AverageMPG;
+        return averageMPG;
     }
 }

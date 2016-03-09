@@ -13,23 +13,23 @@ public class BaseTires implements Tires{
         this.widthInsert = 1.0;
     }
 
-    public double getCoefficentOfFriction() {
+    @Override
+    public double getCoefficientOfFriction() {
         return coefficentOfFriction;
     }
 
+    @Override
     public double getAddedRadius() {
         return addedRadius;
     }
 
+    @Override
     public double getInflationPercentage() {
         return inflationPercentage;
     }
 
-    public double getWidthInsert() {
+    @Override
+    public double getWidthInset() {
         return widthInsert;
-    }
-
-    public void setCoefficentOfFriction(double coefficentOfFriction) {
-        this.coefficentOfFriction = coefficentOfFriction;
     }
 }

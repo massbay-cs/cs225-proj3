@@ -2,7 +2,7 @@ package massbay.cs225;
 
 public interface Engine {
     double getHorsepower();
-    double getCylinders();
+    int getCylinders();
     GasType getGasType();
     double getAverageMPG();
 }

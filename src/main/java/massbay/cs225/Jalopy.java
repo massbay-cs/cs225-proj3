@@ -32,4 +32,9 @@ public class Jalopy implements CarBuild{
     public double getAverageMPG() {
         return engine.getAverageMPG();
     }
+
+    @Override
+    public String toString() {
+        return "Jalopy";
+    }
 }
