@@ -1,4 +1,4 @@
-package massbay.cs225;
+package massbay.cs225.gui;
 
 import javafx.animation.Animation;
 import javafx.animation.Transition;
@@ -9,6 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.util.Duration;
+import massbay.cs225.Car;
 
 import java.util.Arrays;
 import java.util.List;

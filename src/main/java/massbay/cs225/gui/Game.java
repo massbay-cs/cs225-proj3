@@ -1,18 +1,18 @@
-package massbay.cs225;
+package massbay.cs225.gui;
 
+import com.sun.javafx.collections.ImmutableObservableList;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.collections.ObservableList;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
@@ -22,6 +22,7 @@ import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import massbay.cs225.*;
 
 import java.util.*;
 
@@ -41,15 +42,38 @@ public class Game extends Application {
     private static final Paint LOCATION_LABEL_FILL = Color.BLACK;
     private static final double LOCATION_LABEL_MARGIN = 10.0;
     private static final double LOCATION_LABEL_FONT_SIZE = 16.0;
+    private static final double CONFIG_PANE_WIDTH = 150.0;
+
+    private static final Set<CarBuild> carBuilds;
+    private static final Set<RaceTrack> raceTracks;
 
     private IRace race;
     private Stage stage;
     private final List<GuiLocation> guiLocations = new ArrayList<>();
     private final List<GuiCar> guiCars = new ArrayList<>();
+    private final ObservableList<CarBuild> carBuildList;
+    private final ObservableList<RaceTrack> raceTrackList;
 
     // Race Scene
     private Pane canvas;
     private Circle track;
+
+    static {
+        carBuilds = load(CarBuild.class);
+        raceTracks = load(RaceTrack.class);
+    }
+
+    {
+        carBuildList = new ImmutableObservableList<>(carBuilds.toArray(new CarBuild[carBuilds.size()]));
+        raceTrackList = new ImmutableObservableList<>(raceTracks.toArray(new RaceTrack[raceTracks.size()]));
+    }
+
+    private static <T> Set<T> load(Class<T> type) {
+        ServiceLoader<T> loader = ServiceLoader.load(type);
+        Set<T> instances = new HashSet<>();
+        loader.iterator().forEachRemaining(instances::add);
+        return Collections.unmodifiableSet(instances);
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -75,12 +99,13 @@ public class Game extends Application {
     }
 
     private Scene createRaceScene() {
+        //
+        // Center Pane
+        //
+
         Pane canvas = new Pane();
         this.canvas = canvas;
         canvas.setId("center");
-
-        BorderPane root = new BorderPane(canvas);
-        root.setId("root");
 
         Circle track = new Circle();
         this.track = track;
@@ -91,6 +116,30 @@ public class Game extends Application {
         track.setStroke(TRACK_PAINT);
         track.setStrokeWidth(TRACK_WIDTH);
         track.setFill(Color.TRANSPARENT);
+
+        //
+        // Config Pane
+        //
+
+        VBox configPane = new VBox();
+        configPane.setPrefWidth(CONFIG_PANE_WIDTH);
+        configPane.setMaxWidth(CONFIG_PANE_WIDTH);
+
+        Label addACarLabel = new Label(s("game.addACarLabel"));
+        Label carBuildsLabel =
+        ListView<CarBuild> carBuildsView = new ListView<>(carBuildList);
+        ListView<RaceTrack> raceTracksView = new ListView<>(raceTrackList);
+
+        //
+        // Root
+        //
+
+        BorderPane root = new BorderPane(canvas, null, configPane, null, null);
+        root.setId("root");
+
+        //
+        // Debug Code
+        //
 
         createLocations(5);
         updateLocations();
@@ -126,7 +175,7 @@ public class Game extends Application {
             }
         });
 
-        return new Scene(root, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        return new Scene(root, DEFAULT_WIDTH + CONFIG_PANE_WIDTH, DEFAULT_HEIGHT);
     }
 
     private void updateCars() {

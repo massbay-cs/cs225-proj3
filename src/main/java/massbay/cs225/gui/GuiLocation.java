@@ -1,8 +1,9 @@
-package massbay.cs225;
+package massbay.cs225.gui;
 
 import javafx.scene.Node;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
+import massbay.cs225.Location;
 
 import java.util.Arrays;
 import java.util.List;

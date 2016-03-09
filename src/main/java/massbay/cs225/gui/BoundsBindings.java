@@ -1,4 +1,4 @@
-package massbay.cs225;
+package massbay.cs225.gui;
 
 import com.sun.javafx.collections.ImmutableObservableList;
 import javafx.beans.binding.BooleanBinding;
