@@ -1,3 +1,5 @@
+package massbay.cs225;
+
 import java.util.*;
 
 public abstract class RaceTrack implements IRaceTrack {

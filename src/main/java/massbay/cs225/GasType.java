@@ -1,3 +1,5 @@
+package massbay.cs225;
+
 public enum GasType {
     GASOLINE(1.0),  // TODO
     DIESEL(1.0);    // TODO

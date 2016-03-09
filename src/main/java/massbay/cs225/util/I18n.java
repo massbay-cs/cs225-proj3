@@ -1,4 +1,4 @@
-package util;
+package massbay.cs225.util;
 
 import java.util.Locale;
 import java.util.ResourceBundle;

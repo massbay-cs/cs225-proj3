@@ -1,3 +1,5 @@
+package massbay.cs225;
+
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -117,7 +119,7 @@ public class Car{
     public double getCumulativeTime(){
         return this.cumulativeTime;
     }
-//    public List<Location> getPath(){
+//    public List<massbay.cs225.Location> getPath(){
 //        return currentLeg;
 //    }
 //

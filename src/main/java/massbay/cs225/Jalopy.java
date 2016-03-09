@@ -1,3 +1,5 @@
+package massbay.cs225;
+
 public class Jalopy implements CarBuild{
     private Wheels wheels;
     private Engine engine;

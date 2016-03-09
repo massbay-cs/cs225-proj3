@@ -1,3 +1,5 @@
+package massbay.cs225;
+
 public class BaseTank implements GasTank{
 
     private double Gallons;

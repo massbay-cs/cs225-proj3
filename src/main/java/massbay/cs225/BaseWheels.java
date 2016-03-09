@@ -1,9 +1,11 @@
-public class BaseWheel implements Wheels{
+package massbay.cs225;
+
+public class BaseWheels implements Wheels{
     private double width;
     private double radius;
 
 
-    public BaseWheel(){
+    public BaseWheels(){
         this.width = 4.0;
         this.radius = 2.0;
     }

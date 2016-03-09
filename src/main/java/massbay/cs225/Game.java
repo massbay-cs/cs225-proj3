@@ -1,3 +1,5 @@
+package massbay.cs225;
+
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -23,7 +25,7 @@ import javafx.stage.Stage;
 
 import java.util.*;
 
-import static util.I18n.s;
+import static massbay.cs225.util.I18n.s;
 
 public class Game extends Application {
     private static final FontSmoothingType SMOOTHING = FontSmoothingType.LCD; // GRAY has lousy kerning

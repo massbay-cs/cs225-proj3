@@ -1,3 +1,5 @@
+package massbay.cs225;
+
 public class BaseTires implements Tires{
     private double coefficentOfFriction;
     private double inflationPercentage;

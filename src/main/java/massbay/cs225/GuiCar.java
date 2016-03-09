@@ -1,3 +1,5 @@
+package massbay.cs225;
+
 import javafx.animation.Animation;
 import javafx.animation.Transition;
 import javafx.beans.binding.DoubleBinding;
