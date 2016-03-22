@@ -19,7 +19,7 @@
         <paul.classId>cs225</paul.classId>
         <paul.schoolId>massbay</paul.schoolId>
         <paul.repoSite>github.com</paul.repoSite>
-		<paul.repoPath>${paul.schoolId}-cs/${paul.classId}-${paul.artifactId}</paul.repoPath>
+		<paul.repoPath>${paul.schoolId}-cs/${paul.classId}-${project.artifactId}</paul.repoPath>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -29,6 +29,15 @@
         <developerConnection>scm:git:git@${paul.repoSite}:${paul.repoPath}.git</developerConnection>
         <url>https://${paul.repoSite}/${paul.repoPath}</url>
     </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.8</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <finalName>${paul.longStudentId}-${paul.id}</finalName>

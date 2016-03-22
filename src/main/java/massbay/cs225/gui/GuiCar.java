@@ -9,7 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.util.Duration;
-import massbay.cs225.Car;
+import massbay.cs225.api.race.Car;
 
 import java.util.Arrays;
 import java.util.List;

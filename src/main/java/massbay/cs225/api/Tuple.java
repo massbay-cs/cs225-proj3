@@ -1,4 +1,4 @@
-package massbay.cs225;
+package massbay.cs225.api;
 
 public final class Tuple<T, U> {
     private final T a;

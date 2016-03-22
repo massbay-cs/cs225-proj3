@@ -1,16 +1,16 @@
 package massbay.cs225.gui;
 
-import com.sun.javafx.collections.ImmutableObservableList;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -22,15 +22,25 @@ import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import massbay.cs225.*;
+import massbay.cs225.api.carbuild.*;
+import massbay.cs225.api.carbuild.annotation.CarField;
+import massbay.cs225.api.race.Car;
+import massbay.cs225.api.race.IRace;
+import massbay.cs225.api.world.Conditions;
+import massbay.cs225.api.world.Location;
+import massbay.cs225.api.world.RaceLeg;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.util.*;
 
 import static massbay.cs225.util.I18n.s;
 
 public class Game extends Application {
     private static final FontSmoothingType SMOOTHING = FontSmoothingType.LCD; // GRAY has lousy kerning
-    private static final int DEFAULT_WIDTH = 600;
+    private static final int DEFAULT_WIDTH = 700;
     private static final int DEFAULT_HEIGHT = 600;
     private static final Paint TRACK_PAINT = Color.BLACK;
     private static final double TRACK_WIDTH = 3.0;
@@ -42,41 +52,68 @@ public class Game extends Application {
     private static final Paint LOCATION_LABEL_FILL = Color.BLACK;
     private static final double LOCATION_LABEL_MARGIN = 10.0;
     private static final double LOCATION_LABEL_FONT_SIZE = 16.0;
-    private static final double CONFIG_PANE_WIDTH = 150.0;
-
-    private static final Set<CarBuild> carBuilds;
-    private static final Set<RaceTrack> raceTracks;
+    private static final double CONFIG_PANE_WIDTH = 350.0;
 
     private IRace race;
     private Stage stage;
+    private GridPane componentConfigGrid;
+    private final MethodHandles.Lookup lookup = MethodHandles.lookup();
     private final List<GuiLocation> guiLocations = new ArrayList<>();
     private final List<GuiCar> guiCars = new ArrayList<>();
-    private final ObservableList<CarBuild> carBuildList;
-    private final ObservableList<RaceTrack> raceTrackList;
+    private final ObservableList<CarBuild> carBuilds;
+    private final ObservableList<Engine> engines;
+    private final ObservableList<Wheels> wheels;
+    private final ObservableList<Tires> tires;
+    private final ObservableList<GasTank> gasTanks;
+    private final ObservableList<GasType> gasTypes;
+    private final ObservableList<? extends CarComponent> carComponents;
+    private final Map<ComponentType, ObservableList<? extends CarComponent>> componentsByType = new EnumMap<>(ComponentType.class);
 
     // Race Scene
     private Pane canvas;
     private Circle track;
 
-    static {
-        carBuilds = load(CarBuild.class);
-        raceTracks = load(RaceTrack.class);
-    }
-
     {
-        carBuildList = new ImmutableObservableList<>(carBuilds.toArray(new CarBuild[carBuilds.size()]));
-        raceTrackList = new ImmutableObservableList<>(raceTracks.toArray(new RaceTrack[raceTracks.size()]));
-    }
+        componentsByType.put(ComponentType.ENGINE, engines = FXCollections.observableArrayList());
+        componentsByType.put(ComponentType.WHEELS, wheels = FXCollections.observableArrayList());
+        componentsByType.put(ComponentType.TIRES, tires = FXCollections.observableArrayList());
+        componentsByType.put(ComponentType.GAS_TANK, gasTanks = FXCollections.observableArrayList());
+        componentsByType.put(ComponentType.GAS_TYPE, gasTypes = FXCollections.observableArrayList(GasType.GASOLINE, GasType.DIESEL));
 
-    private static <T> Set<T> load(Class<T> type) {
-        ServiceLoader<T> loader = ServiceLoader.load(type);
-        Set<T> instances = new HashSet<>();
-        loader.iterator().forEachRemaining(instances::add);
-        return Collections.unmodifiableSet(instances);
+        // Some hax here because generic type parameters are extremely limited in Java.
+        @SuppressWarnings("unchecked")
+        ObservableList<? extends CarComponent> carComponents = FXCollections.concat(componentsByType.values().toArray(new ObservableList[componentsByType.size()]));;
+        this.carComponents = carComponents;
+
+        carBuilds = FXCollections.observableArrayList();
     }
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private void addComponent(ComponentType type) {
+        try {
+            addComponent(type, type.getType().newInstance());
+        } catch (InstantiationException | IllegalAccessException e) {
+            error(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends CarComponent> void addComponent(ComponentType type, T component) {
+        ((ObservableList) componentsByType.get(type)).add(component);
+        ((ObservableList) carComponents).add(component);
+    }
+
+    private void removeComponent(CarComponent component) {
+        carComponents.remove(component);
+
+        for (ObservableList<? extends CarComponent> components : componentsByType.values()) {
+            if (components.remove(component)) {
+                break;
+            }
+        }
     }
 
     @Override
@@ -96,6 +133,12 @@ public class Game extends Application {
         //css.add("app.css");
 
         stage.setScene(scene);
+    }
+
+    private void error(Throwable e) {
+        e.printStackTrace();
+
+        new Alert(Alert.AlertType.ERROR, e.getLocalizedMessage(), ButtonType.CLOSE).show();
     }
 
     private Scene createRaceScene() {
@@ -121,14 +164,87 @@ public class Game extends Application {
         // Config Pane
         //
 
-        VBox configPane = new VBox();
+        Accordion configPane = new Accordion();
         configPane.setPrefWidth(CONFIG_PANE_WIDTH);
         configPane.setMaxWidth(CONFIG_PANE_WIDTH);
 
-        Label addACarLabel = new Label(s("game.addACarLabel"));
-        Label carBuildsLabel =
-        ListView<CarBuild> carBuildsView = new ListView<>(carBuildList);
-        ListView<RaceTrack> raceTracksView = new ListView<>(raceTrackList);
+        {
+            Label componentsLabel = new Label(s("game.carComponentsLabel"));
+            ListView<? extends CarComponent> componentsView = new ListView<>(carComponents);
+            componentsView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+            componentsView.setEditable(true);
+            componentsView.setCellFactory(CarComponentListCell.factory(true));
+            ComboBox<ComponentType> componentType = new ComboBox<>(FXCollections.observableArrayList(Arrays.stream(ComponentType.values()).filter(ComponentType::isTypeMutable).toArray(ComponentType[]::new)));
+            Button delete = new Button(s("game.deleteAction"));
+            Button create = new Button(s("game.createAction"));
+            HBox buttons = new HBox(delete, create);
+            VBox componentsGroup = new VBox(componentsLabel, componentsView, componentType, buttons);
+
+            componentConfigGrid = new GridPane();
+
+            VBox vbox = new VBox(componentsGroup, componentConfigGrid);
+            TitledPane pane = new TitledPane(s("game.carComponentsTitle"), vbox);
+            configPane.getPanes().add(pane);
+
+            componentsView.getSelectionModel().selectedItemProperty().addListener(this::onComponentsListSelectionChanged);
+
+            create.setOnAction(event -> {
+                ComponentType type = componentType.getValue();
+                if (type == null) {
+                    componentType.requestFocus();
+                    return;
+                }
+
+                addComponent(type);
+
+                componentsView.requestFocus();
+                componentsView.getSelectionModel().selectLast();
+                componentsView.edit(componentsView.getSelectionModel().getSelectedIndex());
+            });
+
+            delete.setOnAction(event -> {
+                CarComponent component = componentsView.getSelectionModel().getSelectedItem();
+                if (component == null) {
+                    componentsView.requestFocus();
+                    return;
+                }
+
+                if (!component.isMutable()) {
+                    new Alert(Alert.AlertType.ERROR, s("game.error.cannotDeleteImmutableComponent"), ButtonType.OK).show();
+                    return;
+                }
+
+                removeComponent(component);
+            });
+        }
+
+        {
+            Label carBuildsLabel = new Label(s("game.carBuildsLabel"));
+            ListView<CarBuild> carBuildsView = new ListView<>(carBuilds);
+            Button delete = new Button(s("game.deleteAction"));
+            Button create = new Button(s("game.createAction"));
+            HBox buttons = new HBox(delete, create);
+            VBox carBuildsGroup = new VBox(carBuildsLabel, carBuildsView, buttons);
+
+            GridPane buildGrid = new GridPane();
+            int row = 1;
+            for (Map.Entry<ComponentType, ObservableList<? extends CarComponent>> entry : componentsByType.entrySet()) {
+                Label label = new Label(entry.getKey().getName() + ":");
+                ComboBox<? extends CarComponent> options = new ComboBox<>(entry.getValue());
+                options.setCellFactory(CarComponentListCell.factory(false));
+                buildGrid.addRow(row++, label, options);
+            }
+
+            VBox vbox = new VBox(carBuildsGroup, buildGrid);
+            TitledPane pane = new TitledPane(s("game.addACarTitle"), vbox);
+            configPane.getPanes().add(pane);
+        }
+
+        {
+            VBox vbox = new VBox();
+            TitledPane pane = new TitledPane(s("game.configureRaceTrackTitle"), vbox);
+            configPane.getPanes().add(pane);
+        }
 
         //
         // Root
@@ -176,6 +292,138 @@ public class Game extends Application {
         });
 
         return new Scene(root, DEFAULT_WIDTH + CONFIG_PANE_WIDTH, DEFAULT_HEIGHT);
+    }
+
+    private void onComponentsListSelectionChanged(ObservableValue<? extends CarComponent> observable, CarComponent oldValue, CarComponent newValue) {
+        componentConfigGrid.getChildren().clear();
+
+        if (newValue == null) {
+            return;
+        }
+
+        Class<? extends CarComponent> type = newValue.getClass();
+        Field[] fields = type.getDeclaredFields();
+
+        int row = 1;
+        for (Field field : fields) {
+            field.setAccessible(true);
+            CarField[] metas = field.getDeclaredAnnotationsByType(CarField.class);
+
+            if (metas.length == 0) {
+                continue;
+            }
+
+            MethodHandle getter, setter;
+            try {
+                getter = lookup.unreflectGetter(field);
+                setter = lookup.unreflectSetter(field);
+            } catch (IllegalAccessException e) {
+                error(e);
+                return;
+            }
+
+            // There isn't really any reason there should be multiple with our use case, but just in case
+            for (CarField meta : metas) {
+                Label label = new Label(s(meta.label()));
+                Control control;
+                Node node;
+
+                try {
+                    switch (meta.type()) {
+                        case PERCENTAGE:
+                            Slider percentage = new Slider(0, 1, (double) getter.invoke(newValue));
+                            control = percentage;
+                            percentage.setMajorTickUnit(.1);
+                            percentage.setMinorTickCount(9);
+                            percentage.valueProperty().addListener((obs, was, n) -> {
+                                try {
+                                    setter.invoke(newValue, n);
+                                } catch (Throwable e) {
+                                    error(e);
+                                }
+                            });
+
+                            Label percentageLabel = new Label();
+                            percentageLabel.textProperty().bind(percentage.valueProperty().multiply(100).asString("%.0f%%"));
+                            node = new HBox(percentage, percentageLabel);
+                            break;
+
+                        case NONNEGATIVE_DOUBLE:
+                            TextField decimal = new TextField(Double.toString((double) getter.invoke(newValue)));
+                            node = control = decimal;
+                            decimal.focusedProperty().addListener((obs, was, is) -> {
+                                if (!was && is) {
+                                    double n;
+                                    try {
+                                        n = Double.parseDouble(decimal.getText());
+                                    } catch (NumberFormatException e) {
+                                        new Alert(Alert.AlertType.ERROR, s("game.error.invalidValue"), ButtonType.OK).showAndWait();
+                                        decimal.requestFocus();
+                                        return;
+                                    }
+
+                                    if (n < 0) {
+                                        new Alert(Alert.AlertType.ERROR, s("game.error.valueMustNotBeNegative"), ButtonType.OK).showAndWait();
+                                        decimal.requestFocus();
+                                        return;
+                                    }
+
+                                    try {
+                                        setter.invoke(newValue, n);
+                                    } catch (Throwable e) {
+                                        error(e);
+                                        return;
+                                    }
+
+                                    decimal.setText(Double.toString(n));
+                                }
+                            });
+                            break;
+
+                        case NONNEGATIVE_INT:
+                            TextField whole = new TextField(Integer.toString((int) getter.invoke(newValue)));
+                            node = control = whole;
+                            whole.focusedProperty().addListener((obs, was, is) -> {
+                                if (!was && is) {
+                                    int n;
+                                    try {
+                                        n = Integer.parseInt(whole.getText());
+                                    } catch (NumberFormatException e) {
+                                        new Alert(Alert.AlertType.ERROR, s("game.error.invalidValue"), ButtonType.OK).showAndWait();
+                                        return;
+                                    }
+
+                                    if (n < 0) {
+                                        new Alert(Alert.AlertType.ERROR, s("game.error.valueMustNotBeNegative"), ButtonType.OK).showAndWait();
+                                        whole.requestFocus();
+                                        return;
+                                    }
+
+                                    try {
+                                        setter.invoke(newValue, n);
+                                    } catch (Throwable e) {
+                                        error(e);
+                                        return;
+                                    }
+
+                                    whole.setText(Double.toString(n));
+                                }
+                            });
+                            break;
+
+                        default:
+                            throw new NullPointerException();
+                    }
+                } catch (Throwable e) {
+                    error(e);
+                    return;
+                }
+
+                control.setDisable(meta.readonly());
+
+                componentConfigGrid.addRow(row++, label, node);
+            }
+        }
     }
 
     private void updateCars() {
